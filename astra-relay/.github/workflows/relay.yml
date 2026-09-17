@@ -1,0 +1,51 @@
+name: Relay
+
+on:
+  issues:
+    types: [opened, labeled, reopened]
+  issue_comment:
+    types: [created]
+  schedule:
+    # Every 15 minutes. GitHub runs scheduled jobs on a best effort basis, so a
+    # tick can be late or skipped when the service is busy.
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+# Only one relay job runs at a time. Without this, a scheduled tick and a
+# comment could advance the same run at once and spend the budget twice.
+concurrency:
+  group: relay
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  advance:
+    # Skip comments the relay posted itself, otherwise each comment would
+    # trigger the next one forever.
+    if: >-
+      github.event_name != 'issue_comment' ||
+      github.event.comment.user.login != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r relay/requirements.txt
+
+      - name: Advance every open run
+        working-directory: relay
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: python loop.py

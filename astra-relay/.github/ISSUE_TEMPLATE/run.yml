@@ -1,0 +1,92 @@
+name: Start a run
+description: Give the director a goal. The relay works on it in the background.
+title: "Run: "
+labels: ["relay"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The director plans the work and reviews results. The engineer writes
+        code, runs it, and reports what actually happened. They trade turns in
+        the comments below until the budget, the turn limit, or a check-in
+        stops them. You get an email on every turn.
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What do you want done? One or two sentences is enough.
+      placeholder: Measure how Python sorting time grows with list size.
+    validations:
+      required: true
+
+  - type: textarea
+    id: instructions
+    attributes:
+      label: Director instructions
+      description: How you want the director to think and work. Leave blank for a plain director.
+      placeholder: Be rigorous. Insist on real numbers. Question anything that looks too clean.
+
+  - type: input
+    id: budget
+    attributes:
+      label: Budget in US dollars
+      description: The run stops before any turn that could take it over this figure. Maximum 50.
+      value: "2"
+    validations:
+      required: true
+
+  - type: input
+    id: checkin
+    attributes:
+      label: Check in with me every N turns
+      description: The run pauses and waits for your comment after this many turns.
+      value: "4"
+    validations:
+      required: true
+
+  - type: input
+    id: turns
+    attributes:
+      label: Turn limit
+      description: The most turns this run will ever take.
+      value: "20"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: director-model
+    attributes:
+      label: Director model
+      options:
+        - gpt-5.6-terra
+        - gpt-6-astra
+        - gpt-5.6-sol
+        - gpt-5.6-luna
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: engineer-model
+    attributes:
+      label: Engineer model
+      options:
+        - claude-sonnet-5
+        - claude-opus-5
+      default: 0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: effort
+    attributes:
+      label: Engineer effort
+      description: How hard the engineer thinks per turn. Low is cheapest and fastest.
+      options:
+        - low
+        - medium
+        - high
+      default: 1
+    validations:
+      required: true
